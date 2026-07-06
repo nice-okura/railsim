@@ -1,0 +1,12 @@
+{
+  "name": "railsim-tests",
+  "private": true,
+  "description": "レールランドのヘッドレスブラウザ回帰テスト",
+  "scripts": {
+    "setup": "npm install && npx playwright install chromium-headless-shell",
+    "test": "node smoke.js"
+  },
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}
