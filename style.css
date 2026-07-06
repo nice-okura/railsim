@@ -8,7 +8,13 @@ html, body {
   touch-action: none;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 #topbar {
+  flex: none;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -68,7 +74,8 @@ button.big.playing { background: #ff8c69; box-shadow: 0 3px 0 #d2643f; }
 
 main {
   display: flex;
-  height: calc(100% - 58px);
+  flex: 1;
+  min-height: 0;
 }
 
 #palette {
@@ -150,3 +157,17 @@ main {
   box-shadow: 0 4px 14px rgba(120, 80, 20, .25);
 }
 #actionbar.hidden { display: none; }
+
+@media (max-width: 480px) {
+  #topbar { gap: 8px; padding: 6px 10px; }
+  #topbar h1 { font-size: 18px; }
+  .subtitle { display: none; }
+  .controls { gap: 6px; }
+  button { font-size: 13px; padding: 7px 10px; }
+  .speed { padding: 3px 8px; font-size: 15px; }
+  .speed input { width: 64px; }
+  #palette { width: 92px; min-width: 92px; padding: 6px 4px; }
+  .palette-title { font-size: 13px; }
+  .palette-item .label { font-size: 10px; }
+  .palette-help { display: none; }
+}
