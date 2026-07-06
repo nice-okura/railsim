@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>レールランド 🚂</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <h1>🚂 レールランド</h1>
+  <span class="subtitle">レールをつなげて でんしゃを はしらせよう！</span>
+  <div class="controls">
+    <button id="btnPlay" class="big" title="うごかす / とめる">▶️ うごかす</button>
+    <label class="speed">
+      🐢<input type="range" id="speed" min="20" max="200" value="90">🐇
+    </label>
+    <button id="btnRescue" title="ぶつかった でんしゃを なおす">🚑 なおす</button>
+    <button id="btnClear" title="ぜんぶ けす">🧹 ぜんぶけす</button>
+  </div>
+</header>
+
+<main>
+  <aside id="palette">
+    <div class="palette-title">🧰 パーツばこ</div>
+    <div id="paletteItems"></div>
+    <div class="palette-help">
+      パーツを ドラッグして<br>おいてね！<br><br>
+      🔀 ぶんきレールは<br>クリックで きりかえ<br><br>
+      🖐 なにもない ところを<br>ドラッグで うごかせるよ
+    </div>
+  </aside>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="actionbar" class="hidden">
+      <button id="btnRotate">🔄 まわす</button>
+      <button id="btnReverse">↩️ ぎゃくむき</button>
+      <button id="btnDelete">🗑 けす</button>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
