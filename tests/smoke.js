@@ -119,6 +119,50 @@ async function resetState(page) {
   });
   check("凸端同士は接続されない", pol === 0, "size=" + pol);
 
+  console.log("[3.5] レールの回転（中心軸・見せかけの接続を作らない）");
+  const rot = await page.evaluate(() => {
+    // rotatePieceInPlace の核心性質: ピースの「見た目の中心」は
+    // 回転してもワールド座標上で動かないこと（=その場でくるっと回る）。
+    // 端点0を軸にすると中心が大きく移動し、それが「繋がっているのに
+    // 実は繋がっていない」見せかけの接続を生む原因だった。
+    const piece = { id: 1, type: "curveR", x: 130, y: 90, rot: 0.4, sw: 0 };
+    const c = pieceLocalCenter(piece);
+    const before = worldPos(piece, { x: c.x, y: c.y, a: 0 });
+    rotatePieceInPlace(piece, Math.PI / 4);
+    const after = worldPos(piece, { x: c.x, y: c.y, a: 0 });
+    return {
+      centerMoved: Math.hypot(after.x - before.x, after.y - before.y),
+      rotChanged: Math.abs(normAng(piece.rot - 0.4 - Math.PI / 4)) < 1e-6,
+    };
+  });
+  check("回転してもピースの中心はワールド座標で動かない（その場で回る）",
+    rot.centerMoved < 1e-6 && rot.rotChanged, JSON.stringify(rot));
+
+  const rotGap = await page.evaluate(() => {
+    // カーブを混ぜた列で、再接続先が無い回転をした場合に
+    // 「繋がって見えるのに実は繋がっていない」状態を作らないか確認
+    pieces = [
+      { id: 1, type: "curveR", x: 0, y: 0, rot: 0, sw: 0 },
+    ];
+    const w0 = worldEndpoint(pieces[0], 1);
+    pieces.push({ id: 2, type: "curveR", x: w0.x, y: w0.y, rot: w0.out, sw: 0 });
+    trains = []; connDirty = true; rebuildConnections();
+    const mid = pieces[1];
+    const before = getConn(mid.id, 0);
+    rotatePieceInPlace(mid, Math.PI / 4); // 45度だけ回す→隣とはもう噛み合わない角度
+    connDirty = true; rebuildConnections();
+    const after = getConn(mid.id, 0);
+    const a = worldEndpoint(pieces[0], 1), b = worldEndpoint(mid, 0);
+    return {
+      wasConnected: !!before,
+      stillConnectedLogically: !!after,
+      visualGap: Math.hypot(a.x - b.x, a.y - b.y),
+    };
+  });
+  check("繋がらない回転をしたら見た目にもはっきり隙間ができる（見せかけの接続にならない）",
+    rotGap.wasConnected && !rotGap.stillConnectedLogically && rotGap.visualGap > 10,
+    JSON.stringify(rotGap));
+
   console.log("[4] 行き止まりで折り返す");
   const bounce = await page.evaluate(() => {
     pieces = [{ id: 1, type: "straight", x: 0, y: 0, rot: 0, sw: 0 }];

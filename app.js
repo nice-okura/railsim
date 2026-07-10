@@ -197,6 +197,27 @@ function applySnap(piece, snap) {
   piece.y += snap.target.y - my1.y;
 }
 
+/* ピースの見た目上の中心（端点の平均）。回転の軸に使う。 */
+function pieceLocalCenter(piece) {
+  const eps = RAIL_TYPES[piece.type].endpoints;
+  let sx = 0, sy = 0;
+  for (const e of eps) { sx += e.x; sy += e.y; }
+  return { x: sx / eps.length, y: sy / eps.length };
+}
+
+/* ピースを中心を軸にして回転させる（端点0を軸にすると、繋がっていた
+ * レールの位置に居座ったまま向きだけ変わり「繋がって見えるのに実際は
+ * 繋がっていない」状態になるため、中心軸で回して見た目にもはっきり
+ * 離れるようにする） */
+function rotatePieceInPlace(piece, deltaAngle) {
+  const c = pieceLocalCenter(piece);
+  const before = worldPos(piece, { x: c.x, y: c.y, a: 0 });
+  piece.rot = normAng(piece.rot + deltaAngle);
+  const after = worldPos(piece, { x: c.x, y: c.y, a: 0 });
+  piece.x += before.x - after.x;
+  piece.y += before.y - after.y;
+}
+
 /* ---------- 電車の走行 ---------- */
 function pathsOf(piece) { return RAIL_TYPES[piece.type].paths; }
 
@@ -879,7 +900,7 @@ document.getElementById("btnRotate").addEventListener("click", () => {
   if (!selection || selection.kind !== "piece") return;
   const p = pieceById(selection.id);
   if (!p) return;
-  p.rot = normAng(p.rot + Math.PI / 4);
+  rotatePieceInPlace(p, Math.PI / 4);
   connDirty = true;
   const snap = findSnap(p);
   if (snap) { applySnap(p, snap); playClick(); connDirty = true; }
